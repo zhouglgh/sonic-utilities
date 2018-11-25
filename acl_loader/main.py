@@ -285,7 +285,7 @@ class AclLoader(object):
         else:
             return port, False
 
-    def convert_transport(self,  table_name, rule_idx, rule):
+    def convert_transport(self, table_name, rule_idx, rule):
         rule_props = {}
 
         if rule.transport.config.source_port:
@@ -320,6 +320,14 @@ class AclLoader(object):
 
         return rule_props
 
+    def convert_input_interface(self, table_name, rule_idx, rule):
+        rule_props = {}
+
+        if rule.input_interface.interface_ref.config.interface:
+            rule_props["IN_PORTS"] = rule.input_interface.interface_ref.config.interface
+
+        return rule_props
+
     def convert_rule_to_db_schema(self, table_name, rule):
         """
         Convert rules format from openconfig ACL to Config DB schema
@@ -337,6 +345,7 @@ class AclLoader(object):
         deep_update(rule_props, self.convert_l2(table_name, rule_idx, rule))
         deep_update(rule_props, self.convert_ipv4(table_name, rule_idx, rule))
         deep_update(rule_props, self.convert_transport(table_name, rule_idx, rule))
+        deep_update(rule_props, self.convert_input_interface(table_name, rule_idx, rule))
 
         return rule_data
 
