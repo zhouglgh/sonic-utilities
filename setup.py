@@ -71,6 +71,7 @@ setup(
         'scripts/intfutil',
         'scripts/lldpshow',
         'scripts/nbrshow',
+        'scripts/neighbor_advertiser',
         'scripts/pcmping',
         'scripts/port2alias',
         'scripts/portconfig',
