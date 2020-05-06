@@ -2924,7 +2924,7 @@ def neighbors():
             else:
                 vnet_intfs[vnet_name] = [k]
 
-    appl_db = swsssdk.SonicV2Connector()
+    appl_db = SonicV2Connector()
     appl_db.connect(appl_db.APPL_DB)
 
     # Fetching data from appl_db for neighbors
@@ -2951,6 +2951,9 @@ def neighbors():
         click.echo(tabulate(table, header))
         click.echo("\n")
 
+    if not bool(vnet_intfs):
+        click.echo(tabulate(table, header))
+
 @vnet.group()
 def routes():
     """Show vnet routes related information"""
@@ -2959,7 +2962,7 @@ def routes():
 @routes.command()
 def all():
     """Show all vnet routes"""
-    appl_db = swsssdk.SonicV2Connector()
+    appl_db = SonicV2Connector()
     appl_db.connect(appl_db.APPL_DB)
 
     header = ['vnet name', 'prefix', 'nexthop', 'interface']
@@ -3002,7 +3005,7 @@ def all():
 @routes.command()
 def tunnel():
     """Show vnet tunnel routes"""
-    appl_db = swsssdk.SonicV2Connector()
+    appl_db = SonicV2Connector()
     appl_db.connect(appl_db.APPL_DB)
 
     header = ['vnet name', 'prefix', 'endpoint', 'mac address', 'vni']
