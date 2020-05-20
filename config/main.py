@@ -646,8 +646,9 @@ def load(filename, yes):
 @config.command()
 @click.option('-y', '--yes', is_flag=True)
 @click.option('-l', '--load-sysinfo', is_flag=True, help='load system default information (mac, portmap etc) first.')
+@click.option('-n', '--no_service_restart', default=False, is_flag=True, help='Do not restart docker services')
 @click.argument('filename', required=False)
-def reload(filename, yes, load_sysinfo):
+def reload(filename, yes, load_sysinfo, no_service_restart):
     """Clear current configuration and import a previous saved config DB dump file.
        <filename> : Names of configuration file(s) to load, separated by comma with no spaces in between
     """
@@ -687,7 +688,9 @@ def reload(filename, yes, load_sysinfo):
             cfg_hwsku = cfg_hwsku.strip()
 
     #Stop services before config push
-    _stop_services()
+    if not no_service_restart:
+        log_info("'reload' stopping services...")
+        _stop_services()
 
     """ In Single AISC platforms we have single DB service. In multi-ASIC platforms we have a global DB
         service running in the host + DB services running in each ASIC namespace created per ASIC.
@@ -759,8 +762,10 @@ def reload(filename, yes, load_sysinfo):
 
     # We first run "systemctl reset-failed" to remove the "failed"
     # status from all services before we attempt to restart them
-    _reset_failed_services()
-    _restart_services()
+    if not no_service_restart:
+        _reset_failed_services()
+        log_info("'reload' restarting services...")
+        _restart_services()
 
 @config.command("load_mgmt_config")
 @click.option('-y', '--yes', is_flag=True, callback=_abort_if_false,
@@ -789,7 +794,8 @@ def load_mgmt_config(filename):
 @config.command("load_minigraph")
 @click.option('-y', '--yes', is_flag=True, callback=_abort_if_false,
                 expose_value=False, prompt='Reload config from minigraph?')
-def load_minigraph():
+@click.option('-n', '--no_service_restart', default=False, is_flag=True, help='Do not restart docker services')
+def load_minigraph(no_service_restart):
     """Reconfigure based on minigraph."""
     log_info("'load_minigraph' executing...")
 
@@ -804,7 +810,9 @@ def load_minigraph():
         device_type = device_type.strip()
 
     #Stop services before config push
-    _stop_services()
+    if not no_service_restart:
+        log_info("'load_minigraph' stopping services...")
+        _stop_services()
 
     # For Single Asic platform the namespace list has the empty string
     # for mulit Asic platform the empty string to generate the config
@@ -849,9 +857,11 @@ def load_minigraph():
 
     # We first run "systemctl reset-failed" to remove the "failed"
     # status from all services before we attempt to restart them
-    _reset_failed_services()
-    #FIXME: After config DB daemon is implemented, we'll no longer need to restart every service.
-    _restart_services()
+    if not no_service_restart:
+        _reset_failed_services()
+        #FIXME: After config DB daemon is implemented, we'll no longer need to restart every service.
+        log_info("'load_minigraph' restarting services...")
+        _restart_services()
     click.echo("Please note setting loaded from minigraph will be lost after system reboot. To preserve setting, run `config save`.")
 
 
